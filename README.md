@@ -7,8 +7,10 @@ Function Library to interface the NidaqServer. The NidaqServer is part of the
 digital events and rewards via National Instruments cards for behavioral
 experiments.
 
-The provided Blueprint functions can be mapped to any kinds of events such as
-`BeginPlay`, keyboard presses, etc., see for example
+For the Unreal Engine to be able to start the NidaqServer, the NidaqServer.exe
+needs to be on the user's path. The provided Blueprint functions can be mapped
+to any kinds of events such as `BeginPlay`, keyboard presses, etc., see for
+example
 
 ![ExampleBlueprint](/Docs/ExampleBlueprint.png)
 
