@@ -59,6 +59,9 @@ void UNiDaqServerBPLibrary::StartNidaqServerProcess()
 	UNiDaqServerBPLibrary::hProcess = FPlatformProcess::CreateProc(TEXT("NidaqServer.exe"),
 		TEXT(""), false, false, false, nullptr, 0, nullptr, nullptr);
 
+	HANDLE hEvent = CreateEventA(nullptr, false, false, "DaqServerDone");
+	DWORD result = WaitForSingleObject(hEvent, DWORD(10000));
+
 }
 
 void UNiDaqServerBPLibrary::StopNidaqServerProcess()
