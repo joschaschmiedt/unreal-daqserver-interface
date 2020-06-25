@@ -174,6 +174,73 @@ DWORD DaqServerInterface::GetTotalRewardTime(unsigned long int * totalTime)
 
 }
 
+DWORD DaqServerInterface::AddLinePulse(unsigned short linenumber, unsigned short pulseEventName)
+{
+	#pragma pack(push, 1)
+	struct {
+		BYTE type = 1;
+		unsigned short line = 0;
+		unsigned short pulse = 0;
+	} PulseLineMsg;
+	#pragma pack(pop)
+	
+	PulseLineMsg.line = linenumber;
+	PulseLineMsg.pulse = pulseEventName;
+
+	DWORD nBytesWritten = 0;
+	bool success = WriteFile(hPipe, &PulseLineMsg.type, 5, &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == 5) ) { return S_OK; }
+	else { return GetLastError(); }
+
+}
+
+DWORD DaqServerInterface::AddLineOnOff(unsigned short linenumber, unsigned short onEventName, unsigned short offEventName)
+{
+	#pragma pack(push, 1)
+	struct {
+		BYTE type = 2;
+		unsigned short line = 0;
+		unsigned short onevent = 0;
+		unsigned short offevent = 0;
+	} OnOffLineMsg;
+	#pragma pack(pop)
+
+	OnOffLineMsg.line = linenumber;
+	OnOffLineMsg.onevent = onEventName;
+	OnOffLineMsg.offevent = offEventName;
+	DWORD nBytesWritten = 0;
+	bool success = WriteFile(hPipe, &OnOffLineMsg.type, 7, &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == 7) ) { return S_OK; }
+	else { return GetLastError(); }
+
+}
+
+DWORD DaqServerInterface::StartTrackingLine()
+{
+	DaqServerInterface::hDaqServerDoneEvent = CreateEventA(NULL, FALSE, FALSE, "DaqServerDone");
+	bool success = ResetEvent(DaqServerInterface::hDaqServerDoneEvent)
+	if (!success) {
+		return GetLastError();
+	}
+	DWORD nBytesWritten = 0;
+	DWORD msg = 3;
+	bool success = WriteFile(DaqServerInterface::hPipe, &msg, 1, &nBytesWritten, NULL);
+	if (!success) {
+		return GetLastError();
+	}
+	DWORD WaitResult;
+	WaitResult = WaitForSingleObject(DaqServerInterface::hDaqServerDoneEvent, DWORD(10000));
+	switch (WaitResult)
+    {
+        case WAIT_OBJECT_0:
+			return S_OK;
+        // An error occurred
+        default:
+            return GetLastError();
+    }
+
+}
+
 DWORD DaqServerInterface::StartDaqserverProcess()
 {
 

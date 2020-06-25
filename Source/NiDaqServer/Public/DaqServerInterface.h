@@ -20,6 +20,9 @@ public:
 	static DWORD GiveReward(unsigned short * pTimes, unsigned short nTimes);
     static DWORD SetRewardTime(unsigned short int timems);
 	static DWORD GetTotalRewardTime(unsigned long int * totalTime);
+	static DWORD AddLinePulse(unsigned short linenumber, unsigned short pulseEventName);
+	static DWORD AddLineOnOff(unsigned short linenumber, unsigned short onEventName, unsigned short offEventName);
+	static DWORD StartTrackingLine();
 	static DWORD StartDaqserverProcess();
 	static DWORD StopDaqserverProcess();
 
@@ -27,6 +30,7 @@ private:
 	static HANDLE hPipe;
 	static HANDLE hRewardEvent;
 	static HANDLE hRewardDoneEvent;
+	static HANDLE hDaqServerDoneEvent;
 	static PROCESS_INFORMATION processInformation;
 	static STARTUPINFOA startupInfo;	
 };
