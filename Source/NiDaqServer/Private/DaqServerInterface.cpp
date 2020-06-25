@@ -6,6 +6,7 @@
 HANDLE DaqServerInterface::hPipe = INVALID_HANDLE_VALUE;
 HANDLE DaqServerInterface::hRewardEvent = INVALID_HANDLE_VALUE;
 HANDLE DaqServerInterface::hRewardDoneEvent = INVALID_HANDLE_VALUE;
+HANDLE DaqServerInterface::hDaqServerDoneEvent = INVALID_HANDLE_VALUE;
 
 PROCESS_INFORMATION DaqServerInterface::processInformation;
 STARTUPINFOA DaqServerInterface::startupInfo;
@@ -174,43 +175,44 @@ DWORD DaqServerInterface::GetTotalRewardTime(unsigned long int * totalTime)
 
 }
 
-DWORD DaqServerInterface::AddLinePulse(unsigned short linenumber, unsigned short pulseEventName)
+DWORD DaqServerInterface::AddLinePulse(unsigned short linenumber)
 {
 	#pragma pack(push, 1)
 	struct {
 		BYTE type = 1;
 		unsigned short line = 0;
-		unsigned short pulse = 0;
+		unsigned char pulse[11] = { 0 };
 	} PulseLineMsg;
 	#pragma pack(pop)
 	
 	PulseLineMsg.line = linenumber;
-	PulseLineMsg.pulse = pulseEventName;
+	PulseLineMsg.pulse = 'DaqDigPulse';
+
 
 	DWORD nBytesWritten = 0;
-	bool success = WriteFile(hPipe, &PulseLineMsg.type, 5, &nBytesWritten, NULL);
-	if ( success & (nBytesWritten == 5) ) { return S_OK; }
+	bool success = WriteFile(hPipe, &PulseLineMsg.type, 14, &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == 14) ) { return S_OK; }
 	else { return GetLastError(); }
 
 }
 
-DWORD DaqServerInterface::AddLineOnOff(unsigned short linenumber, unsigned short onEventName, unsigned short offEventName)
+DWORD DaqServerInterface::AddLineOnOff(unsigned short linenumber)
 {
 	#pragma pack(push, 1)
 	struct {
 		BYTE type = 2;
 		unsigned short line = 0;
-		unsigned short onevent = 0;
-		unsigned short offevent = 0;
+		unsigned char onevent[8] = { 0 };
+		unsigned char offevent[9] = { 0 };
 	} OnOffLineMsg;
 	#pragma pack(pop)
 
 	OnOffLineMsg.line = linenumber;
-	OnOffLineMsg.onevent = onEventName;
-	OnOffLineMsg.offevent = offEventName;
+	OnOffLineMsg.onevent = 'DaqDigOn';
+	OnOffLineMsg.offevent = 'DaqDigOff';
 	DWORD nBytesWritten = 0;
-	bool success = WriteFile(hPipe, &OnOffLineMsg.type, 7, &nBytesWritten, NULL);
-	if ( success & (nBytesWritten == 7) ) { return S_OK; }
+	bool success = WriteFile(hPipe, &OnOffLineMsg.type, 20, &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == 20) ) { return S_OK; }
 	else { return GetLastError(); }
 
 }
