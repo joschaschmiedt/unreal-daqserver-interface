@@ -175,44 +175,44 @@ DWORD DaqServerInterface::GetTotalRewardTime(unsigned long int * totalTime)
 
 }
 
-DWORD DaqServerInterface::AddLinePulse(unsigned short linenumber)
+DWORD DaqServerInterface::AddLinePulse(unsigned short linenumber, std::string pulseEventName)
 {
 	#pragma pack(push, 1)
 	struct {
 		BYTE type = 1;
 		unsigned short line = 0;
-		unsigned char pulse[11] = { 0 };
+		std::string pulse;
 	} PulseLineMsg;
 	#pragma pack(pop)
 	
 	PulseLineMsg.line = linenumber;
-	PulseLineMsg.pulse = 'DaqDigPulse';
+	PulseLineMsg.pulse = pulseEventName;
 
 
 	DWORD nBytesWritten = 0;
-	bool success = WriteFile(hPipe, &PulseLineMsg.type, 14, &nBytesWritten, NULL);
-	if ( success & (nBytesWritten == 14) ) { return S_OK; }
+	bool success = WriteFile(hPipe, &PulseLineMsg.type, sizeof(PulseLineMsg), &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == sizeof(PulseLineMsg)) ) { return S_OK; }
 	else { return GetLastError(); }
 
 }
 
-DWORD DaqServerInterface::AddLineOnOff(unsigned short linenumber)
+DWORD DaqServerInterface::AddLineOnOff(unsigned short linenumber, std::string onEventName, std::string offEventName)
 {
 	#pragma pack(push, 1)
 	struct {
 		BYTE type = 2;
 		unsigned short line = 0;
-		unsigned char onevent[8] = { 0 };
-		unsigned char offevent[9] = { 0 };
+		std::string onevent;
+		std::string offevent;
 	} OnOffLineMsg;
 	#pragma pack(pop)
 
 	OnOffLineMsg.line = linenumber;
-	OnOffLineMsg.onevent = 'DaqDigOn';
-	OnOffLineMsg.offevent = 'DaqDigOff';
+	OnOffLineMsg.onevent = onEventName;
+	OnOffLineMsg.offevent = offEventName;
 	DWORD nBytesWritten = 0;
-	bool success = WriteFile(hPipe, &OnOffLineMsg.type, 20, &nBytesWritten, NULL);
-	if ( success & (nBytesWritten == 20) ) { return S_OK; }
+	bool success = WriteFile(hPipe, &OnOffLineMsg.type, sizeof(OnOffLineMsg), &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == sizeof(OnOffLineMsg)) ) { return S_OK; }
 	else { return GetLastError(); }
 
 }

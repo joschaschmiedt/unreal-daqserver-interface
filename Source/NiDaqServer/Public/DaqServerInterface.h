@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Windows/MinWindows.h"
+#include <string>
 #define BUFFERSIZE 32
 
 union COMMANDBUFFER {
@@ -20,8 +21,8 @@ public:
 	static DWORD GiveReward(unsigned short * pTimes, unsigned short nTimes);
     static DWORD SetRewardTime(unsigned short int timems);
 	static DWORD GetTotalRewardTime(unsigned long int * totalTime);
-	static DWORD AddLinePulse(unsigned short linenumber);
-	static DWORD AddLineOnOff(unsigned short linenumber);
+	static DWORD AddLinePulse(unsigned short linenumber, std::string pulseEventName);
+	static DWORD AddLineOnOff(unsigned short linenumber, std::string onEventName, std::string offEventName);
 	static DWORD StartTrackingLine();
 	static DWORD StartDaqserverProcess();
 	static DWORD StopDaqserverProcess();
