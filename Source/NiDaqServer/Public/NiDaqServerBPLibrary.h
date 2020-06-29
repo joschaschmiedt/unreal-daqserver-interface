@@ -6,7 +6,6 @@
 #include "NiDaqServerBPLibrary.generated.h"
 
 
-
 /* 
 *	Function library class.
 *	Each function in it is expected to be static and represents blueprint node that can be called in any blueprint.
@@ -49,6 +48,21 @@ class UNiDaqServerBPLibrary : public UBlueprintFunctionLibrary
 
 	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
 		static void SendEventmarker(int code);
+
+	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
+		static void AddPulseEvent(int linenumber, FString pulseEventName);
+	
+	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
+		static void AddOnOffEvents(int linenumber, FString onEventName, FString offEventName);
+
+	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
+		static void StartTracking();
+
+	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
+		static bool IsEventSignaled(FString name);
+
+	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
+		static bool WaitForDigitalEvent(int duration, FString name);
 
 	static FProcHandle hProcess;
 };

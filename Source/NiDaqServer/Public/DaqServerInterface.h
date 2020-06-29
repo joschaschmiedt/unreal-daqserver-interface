@@ -23,7 +23,7 @@ public:
 	static DWORD GetTotalRewardTime(unsigned long int * totalTime);
 	static DWORD AddLinePulse(unsigned short linenumber, std::string pulseEventName);
 	static DWORD AddLineOnOff(unsigned short linenumber, std::string onEventName, std::string offEventName);
-	static DWORD StartTrackingLine();
+	static DWORD StartTrackingLines();
 	static DWORD StartDaqserverProcess();
 	static DWORD StopDaqserverProcess();
 

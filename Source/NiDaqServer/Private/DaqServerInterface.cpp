@@ -217,7 +217,7 @@ DWORD DaqServerInterface::AddLineOnOff(unsigned short linenumber, std::string on
 
 }
 
-DWORD DaqServerInterface::StartTrackingLine()
+DWORD DaqServerInterface::StartTrackingLines()
 {
 	DaqServerInterface::hDaqServerDoneEvent = CreateEventA(NULL, FALSE, FALSE, "DaqServerDone");
 	bool success = ResetEvent(DaqServerInterface::hDaqServerDoneEvent)
