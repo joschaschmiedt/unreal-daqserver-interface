@@ -10,7 +10,7 @@
 FProcHandle UNiDaqServerBPLibrary::hProcess = FProcHandle(nullptr);
 
 UNiDaqServerBPLibrary::UNiDaqServerBPLibrary(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 
 }
@@ -71,9 +71,7 @@ void UNiDaqServerBPLibrary::StopNidaqServerProcess()
 	FPlatformProcess::TerminateProc(UNiDaqServerBPLibrary::hProcess);
 	FPlatformProcess::WaitForProc(UNiDaqServerBPLibrary::hProcess);
 	FPlatformProcess::CloseProc(UNiDaqServerBPLibrary::hProcess);
-	//ensureMsgf(DaqServerInterface::StopDaqserverProcess() == 0,
-		//TEXT("Stop of NidaqServer.exe failed"));
-
+	//ensureMsgf(DaqServerInterface::StopDaqserverProcess() == 0,//TEXT("Stop of NidaqServer.exe failed"));
 }
 
 void UNiDaqServerBPLibrary::SendEventmarker(int code)
@@ -85,10 +83,10 @@ void UNiDaqServerBPLibrary::SendEventmarker(int code)
 
 void UNiDaqServerBPLibrary::AddPulseEvent(int linenumber, FString pulseEventName)
 {
-	UE_LOG(LogTemp, Display, TEXT("Add line %d to monitor digital pulse events %s"), linenumber, pulseEventName);
+	UE_LOG(LogTemp, Display, TEXT("Add line %d to monitor digital pulse events %s"), linenumber, *pulseEventName);
 	ensureAlwaysMsgf(
 		DaqServerInterface::AddLinePulse(
-			unsigned short(linenumber), 
+			BYTE(linenumber),
 			std::string(TCHAR_TO_UTF8(*pulseEventName))) == 0,
 		TEXT("Daqserver: could not add pulse event"));
 }
@@ -98,9 +96,9 @@ void UNiDaqServerBPLibrary::AddOnOffEvents(int linenumber, FString onEventName, 
 	UE_LOG(LogTemp, Display, TEXT("Add line %d to monitor for digital reset events"), linenumber);
 	ensureAlwaysMsgf(
 		DaqServerInterface::AddLineOnOff(
-			unsigned short(linenumber),
+			BYTE(linenumber),
 			std::string(TCHAR_TO_UTF8(*onEventName)),
-			std::string(TCHAR_TO_UTF8(*offEventName))) == 0,
+			std::string(TCHAR_TO_UTF8(*onEventName))) == 0,
 		TEXT("Daqserver: could not add onoff event"));
 }
 
@@ -108,12 +106,11 @@ void UNiDaqServerBPLibrary::StartTracking()
 {
 	// Once this is started you cannot add any more lines
 	UE_LOG(LogTemp, Display, TEXT("Starting digital input monitoring"));
-	ensureAlwaysMsgf(DaqServerInterface::StartTrackingLines() == 0,
+	ensureAlwaysMsgf(DaqServerInterface::StartTrackingLines() == 0, 
 		TEXT("Daqserver: could not start digital input tracking"));
-
 }
 
-bool UEyeServerBPLibrary::IsEventSignaled(FString name)
+bool UNiDaqServerBPLibrary::IsEventSignaled(FString name)
 {	
 	HANDLE hEvent = CreateEventA(NULL, FALSE, FALSE, (std::string(TCHAR_TO_UTF8(*name)) + "\0").c_str() );
 	DWORD result = WaitForSingleObject(hEvent, 0);
@@ -122,7 +119,7 @@ bool UEyeServerBPLibrary::IsEventSignaled(FString name)
 		return true;
 	}
 	else {
-		UE_LOG(LogTemp, Display, TEXT("Daqserver: digital input %s is signaled"), *name);
+		UE_LOG(LogTemp, Display, TEXT("Daqserver: digital input %s is unsignaled"), *name);
 		return false;
 	}	
 }
@@ -137,10 +134,10 @@ bool UNiDaqServerBPLibrary::WaitForDigitalEvent(int duration, FString name)
             UE_LOG(LogTemp, Display, TEXT("Daqserver: digital event %s triggered"), *name);
 			return true;
         case WAIT_TIMEOUT:
-            ensureAlwaysMsgf(false, TEXT("Daqserver: Wait timeout without %s event"), *name);
+			UE_LOG(LogTemp, Display, TEXT("Daqserver: Wait timeout without %s event"), *name);
 			return false;
         default: 
-            ensureAlwaysMsgf(false, TEXT("Daqserver: Wait error: %d", GetLastError()));
+            ensureAlwaysMsgf(false, TEXT("Daqserver: Wait error: %d"), GetLastError());
 			return false;
     }
 

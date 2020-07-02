@@ -175,12 +175,12 @@ DWORD DaqServerInterface::GetTotalRewardTime(unsigned long int * totalTime)
 
 }
 
-DWORD DaqServerInterface::AddLinePulse(unsigned short linenumber, std::string pulseEventName)
+DWORD DaqServerInterface::AddLinePulse(BYTE linenumber, std::string pulseEventName)
 {
 	#pragma pack(push, 1)
 	struct {
 		BYTE type = 1;
-		unsigned short line = 0;
+		BYTE line = 0;
 		std::string pulse;
 	} PulseLineMsg;
 	#pragma pack(pop)
@@ -196,12 +196,12 @@ DWORD DaqServerInterface::AddLinePulse(unsigned short linenumber, std::string pu
 
 }
 
-DWORD DaqServerInterface::AddLineOnOff(unsigned short linenumber, std::string onEventName, std::string offEventName)
+DWORD DaqServerInterface::AddLineOnOff(BYTE linenumber, std::string onEventName, std::string offEventName)
 {
 	#pragma pack(push, 1)
 	struct {
 		BYTE type = 2;
-		unsigned short line = 0;
+		BYTE line = 0;
 		std::string onevent;
 		std::string offevent;
 	} OnOffLineMsg;
@@ -220,14 +220,14 @@ DWORD DaqServerInterface::AddLineOnOff(unsigned short linenumber, std::string on
 DWORD DaqServerInterface::StartTrackingLines()
 {
 	DaqServerInterface::hDaqServerDoneEvent = CreateEventA(NULL, FALSE, FALSE, "DaqServerDone");
-	bool success = ResetEvent(DaqServerInterface::hDaqServerDoneEvent)
+	bool success = ResetEvent(DaqServerInterface::hDaqServerDoneEvent);
 	if (!success) {
 		return GetLastError();
 	}
 	DWORD nBytesWritten = 0;
 	DWORD msg = 3;
-	bool success = WriteFile(DaqServerInterface::hPipe, &msg, 1, &nBytesWritten, NULL);
-	if (!success) {
+	bool success2 = WriteFile(DaqServerInterface::hPipe, &msg, 1, &nBytesWritten, NULL);
+	if (!success2) {
 		return GetLastError();
 	}
 	DWORD WaitResult;
