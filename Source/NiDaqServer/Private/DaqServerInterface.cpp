@@ -198,18 +198,28 @@ DWORD DaqServerInterface::AddLinePulse(BYTE linenumber, std::string pulseEventNa
 
 DWORD DaqServerInterface::AddLineOnOff(BYTE linenumber, std::string onEventName, std::string offEventName)
 {
+	int nOn = onEventName.length();
+	int nOff = offEventName.length();
+	
+	if (nOn+nOff+2 > 30)
+	{
+		return E_INVALIDARG;
+	}
 	#pragma pack(push, 1)
 	struct {
 		BYTE type = 2;
 		BYTE line = 0;
-		std::string onevent;
-		std::string offevent;
+		//char name[30] = "OnEvent\0OffEvent";
+		char name[30] = {};
 	} OnOffLineMsg;
 	#pragma pack(pop)
 
+	// Need memcpy to include the null character
+	memcpy(OnOffLineMsg.name, onEventName.c_str(), nOn+1);
+	memcpy(&OnOffLineMsg.name[nOn+1], offEventName.c_str(), nOff+1);
+
 	OnOffLineMsg.line = linenumber;
-	OnOffLineMsg.onevent = onEventName;
-	OnOffLineMsg.offevent = offEventName;
+
 	DWORD nBytesWritten = 0;
 	bool success = WriteFile(hPipe, &OnOffLineMsg.type, sizeof(OnOffLineMsg), &nBytesWritten, NULL);
 	if ( success & (nBytesWritten == sizeof(OnOffLineMsg)) ) { return S_OK; }

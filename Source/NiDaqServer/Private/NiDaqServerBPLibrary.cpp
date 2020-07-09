@@ -93,12 +93,12 @@ void UNiDaqServerBPLibrary::AddPulseEvent(int linenumber, FString pulseEventName
 
 void UNiDaqServerBPLibrary::AddOnOffEvents(int linenumber, FString onEventName, FString offEventName)
 {
-	UE_LOG(LogTemp, Display, TEXT("Add line %d to monitor for digital reset events"), linenumber);
+	UE_LOG(LogTemp, Display, TEXT("Add line %d to monitor for digital reset events %s and %s"), linenumber, *onEventName, *offEventName);
 	ensureAlwaysMsgf(
 		DaqServerInterface::AddLineOnOff(
 			BYTE(linenumber),
 			std::string(TCHAR_TO_UTF8(*onEventName)),
-			std::string(TCHAR_TO_UTF8(*onEventName))) == 0,
+			std::string(TCHAR_TO_UTF8(*offEventName))) == 0,
 		TEXT("Daqserver: could not add onoff event"));
 }
 
