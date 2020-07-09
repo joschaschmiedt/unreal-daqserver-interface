@@ -6,6 +6,7 @@
 HANDLE DaqServerInterface::hPipe = INVALID_HANDLE_VALUE;
 HANDLE DaqServerInterface::hRewardEvent = INVALID_HANDLE_VALUE;
 HANDLE DaqServerInterface::hRewardDoneEvent = INVALID_HANDLE_VALUE;
+HANDLE DaqServerInterface::hDaqServerDoneEvent = INVALID_HANDLE_VALUE;
 
 PROCESS_INFORMATION DaqServerInterface::processInformation;
 STARTUPINFOA DaqServerInterface::startupInfo;
@@ -171,6 +172,84 @@ DWORD DaqServerInterface::GetTotalRewardTime(unsigned long int * totalTime)
 	{
 		return GetLastError();
 	}
+
+}
+
+DWORD DaqServerInterface::AddLinePulse(BYTE linenumber, std::string pulseEventName)
+{
+	#pragma pack(push, 1)
+	struct {
+		BYTE type = 1;
+		BYTE line = 0;
+		std::string pulse;
+	} PulseLineMsg;
+	#pragma pack(pop)
+	
+	PulseLineMsg.line = linenumber;
+	PulseLineMsg.pulse = pulseEventName;
+
+
+	DWORD nBytesWritten = 0;
+	bool success = WriteFile(hPipe, &PulseLineMsg.type, sizeof(PulseLineMsg), &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == sizeof(PulseLineMsg)) ) { return S_OK; }
+	else { return GetLastError(); }
+
+}
+
+DWORD DaqServerInterface::AddLineOnOff(BYTE linenumber, std::string onEventName, std::string offEventName)
+{
+	int nOn = onEventName.length();
+	int nOff = offEventName.length();
+	
+	if (nOn+nOff+2 > 30)
+	{
+		return E_INVALIDARG;
+	}
+	#pragma pack(push, 1)
+	struct {
+		BYTE type = 2;
+		BYTE line = 0;
+		//char name[30] = "OnEvent\0OffEvent";
+		char name[30] = {};
+	} OnOffLineMsg;
+	#pragma pack(pop)
+
+	// Need memcpy to include the null character
+	memcpy(OnOffLineMsg.name, onEventName.c_str(), nOn+1);
+	memcpy(&OnOffLineMsg.name[nOn+1], offEventName.c_str(), nOff+1);
+
+	OnOffLineMsg.line = linenumber;
+
+	DWORD nBytesWritten = 0;
+	bool success = WriteFile(hPipe, &OnOffLineMsg.type, sizeof(OnOffLineMsg), &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == sizeof(OnOffLineMsg)) ) { return S_OK; }
+	else { return GetLastError(); }
+
+}
+
+DWORD DaqServerInterface::StartTrackingLines()
+{
+	DaqServerInterface::hDaqServerDoneEvent = CreateEventA(NULL, FALSE, FALSE, "DaqServerDone");
+	bool success = ResetEvent(DaqServerInterface::hDaqServerDoneEvent);
+	if (!success) {
+		return GetLastError();
+	}
+	DWORD nBytesWritten = 0;
+	DWORD msg = 3;
+	bool success2 = WriteFile(DaqServerInterface::hPipe, &msg, 1, &nBytesWritten, NULL);
+	if (!success2) {
+		return GetLastError();
+	}
+	DWORD WaitResult;
+	WaitResult = WaitForSingleObject(DaqServerInterface::hDaqServerDoneEvent, DWORD(10000));
+	switch (WaitResult)
+    {
+        case WAIT_OBJECT_0:
+			return S_OK;
+        // An error occurred
+        default:
+            return GetLastError();
+    }
 
 }
 
