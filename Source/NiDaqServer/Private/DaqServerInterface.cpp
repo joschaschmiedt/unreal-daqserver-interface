@@ -46,11 +46,10 @@ DWORD DaqServerInterface::Connect()
 DWORD DaqServerInterface::Disconnect()
 {
 	// Close pipe
-	bool disconnectSuccess = DisconnectNamedPipe(hPipe);
 	bool closeSuccess = CloseHandle(hPipe);
 	DaqServerInterface::hPipe = INVALID_HANDLE_VALUE;
 
-	if (disconnectSuccess & closeSuccess) {
+	if (closeSuccess) {
 		return S_OK;
 	}
 	else
