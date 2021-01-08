@@ -56,6 +56,15 @@ class UNiDaqServerBPLibrary : public UBlueprintFunctionLibrary
 		static void AddOnOffEvents(int linenumber, FString onEventName, FString offEventName);
 
 	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
+		static bool AddOutputLinePulse(int linenumber, FString pulseOutName);
+
+	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
+		static bool SetOutputPulseDuration(int linenumber, int timems);
+
+	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
+		static bool OutputPulse(FString pulseOutName);
+
+	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
 		static void StartTracking();
 
 	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")

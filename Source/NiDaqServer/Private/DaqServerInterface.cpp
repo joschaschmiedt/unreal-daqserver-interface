@@ -226,6 +226,46 @@ DWORD DaqServerInterface::AddLineOnOff(BYTE linenumber, std::string onEventName,
 
 }
 
+DWORD DaqServerInterface::AddOutputLinePulse(BYTE linenumber, std::string pulseOutName)
+{
+	#pragma pack(push, 1)
+	struct {
+		BYTE type = 9;
+		BYTE line = 0;
+		std::string pulse;
+	} OutLineMsg;
+	#pragma pack(pop)
+	
+	OutLineMsg.line = linenumber;
+	OutLineMsg.pulse = pulseOutName;
+
+
+	DWORD nBytesWritten = 0;
+	bool success = WriteFile(hPipe, &OutLineMsg.type, sizeof(OutLineMsg), &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == sizeof(OutLineMsg)) ) { return S_OK; }
+	else { return GetLastError(); }
+
+}
+
+DWORD DaqServerInterface::SetPulseDuration(BYTE linenumber, unsigned short int timems)
+{
+	#pragma pack(push, 1)
+	struct {
+		BYTE type = 4;
+		BYTE line = 0;
+		unsigned short time = 0;
+	} PulseTimeMsg;
+	#pragma pack(pop)
+	PulseTimeMsg.line = linenumber;
+	PulseTimeMsg.time = timems;
+
+	DWORD nBytesWritten = 0;
+	bool success = WriteFile(DaqServerInterface::hPipe, &PulseTimeMsg.type, sizeof(PulseTimeMsg), &nBytesWritten, NULL);
+	if ( success & (nBytesWritten == sizeof(PulseTimeMsg)) ) { return S_OK; }
+	else { return GetLastError(); }
+	
+}
+
 DWORD DaqServerInterface::StartTrackingLines()
 {
 	DaqServerInterface::hDaqServerDoneEvent = CreateEventA(NULL, FALSE, FALSE, "DaqServerDone");

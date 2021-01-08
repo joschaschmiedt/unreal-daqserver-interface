@@ -102,6 +102,53 @@ void UNiDaqServerBPLibrary::AddOnOffEvents(int linenumber, FString onEventName, 
 		TEXT("Daqserver: could not add onoff event"));
 }
 
+bool UNiDaqServerBPLibrary::AddOutputLinePulse(int linenumber, FString pulseOutName)
+{
+	if (linenumber == 3) {
+		ensureAlwaysMsgf(false, TEXT("Daqserver: digital line %d is reserved for reward"), linenumber);
+		return false;
+	}
+	else if (linenumber == 7) {
+		ensureAlwaysMsgf(false, TEXT("Daqserver: digital line %d is reserved for eventmarkers"), linenumber);
+		return false;
+	}
+	
+	UE_LOG(LogTemp, Display, TEXT("Add line %d to generate pulse output %s"), linenumber, *pulseOutName);
+	if (ensureAlwaysMsgf(
+		DaqServerInterface::AddOutputLinePulse(
+			BYTE(linenumber),
+			std::string(TCHAR_TO_UTF8(*pulseOutName))) == 0,
+		TEXT("Daqserver: could not add pulse event"))) {
+		return true;
+	}
+	else { return false; }
+}
+
+bool UNiDaqServerBPLibrary::SetOutputPulseDuration(int linenumber, int timems)
+{
+	if (ensureAlwaysMsgf(
+		DaqServerInterface::SetPulseDuration(BYTE(linenumber), unsigned short(timems)) == 0,
+		TEXT("Daqserver: set pulse duration of line %d"), linenumber)) {
+		return true;
+	}
+	else { return false; }
+}
+
+bool UNiDaqServerBPLibrary::OutputPulse(FString pulseOutName)
+{	
+	HANDLE hEvent = CreateEventA(NULL, FALSE, FALSE, (std::string(TCHAR_TO_UTF8(*pulseOutName)) + "\0").c_str() );
+	bool success = SetEvent(hEvent);	
+	if (success) { 
+		UE_LOG(LogTemp, Display, TEXT("%s sent"), *pulseOutName);
+		return true;
+	}
+	else { 
+		ensureAlwaysMsgf(false, TEXT("Daqserver: %s was not sent, error: %d"), *pulseOutName, GetLastError());
+		return false;
+	}
+}
+
+
 void UNiDaqServerBPLibrary::StartTracking()
 {
 	// Once this is started you cannot add any more lines
