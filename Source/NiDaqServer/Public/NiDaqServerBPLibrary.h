@@ -47,7 +47,10 @@ class UNiDaqServerBPLibrary : public UBlueprintFunctionLibrary
 		static void StopNidaqServerProcess();
 
 	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
-		static void SendEventmarker(int code);
+		static bool isNidaqServerProcessRunning();
+
+	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
+		static int64 SendEventmarker(int code);
 
 	UFUNCTION(BlueprintCallable, Category = "NiDaqServer")
 		static void AddPulseEvent(int linenumber, FString pulseEventName);

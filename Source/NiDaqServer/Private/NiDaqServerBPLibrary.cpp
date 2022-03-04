@@ -74,11 +74,22 @@ void UNiDaqServerBPLibrary::StopNidaqServerProcess()
 	//ensureMsgf(DaqServerInterface::StopDaqserverProcess() == 0,//TEXT("Stop of NidaqServer.exe failed"));
 }
 
-void UNiDaqServerBPLibrary::SendEventmarker(int code)
+bool UNiDaqServerBPLibrary::isNidaqServerProcessRunning()
+{
+	
+	return FPlatformProcess::IsProcRunning(UNiDaqServerBPLibrary::hProcess);
+
+}
+
+int64 UNiDaqServerBPLibrary::SendEventmarker(int code)
 {
 	UE_LOG(LogTemp, Display, TEXT("Send eventmarker %d"), code);
 	ensureAlwaysMsgf(DaqServerInterface::SendEventmarker(unsigned short(code)) == 0,
 		TEXT("Could not send eventmarker"));
+
+	LARGE_INTEGER ticks;
+	QueryPerformanceCounter(&ticks);
+	return ticks.QuadPart;
 }
 
 void UNiDaqServerBPLibrary::AddPulseEvent(int linenumber, FString pulseEventName)
